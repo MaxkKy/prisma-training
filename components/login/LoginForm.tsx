@@ -52,6 +52,7 @@ export default function LoginForm() {
           {saving ? "saving" : "Create"}
         </button>
         <Link href="/">View</Link>
+        <p>test prisma and git and sourcetree</p>
       </form>
     </div>
   );
