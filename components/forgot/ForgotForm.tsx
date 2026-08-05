@@ -3,10 +3,12 @@
 import axios from "axios";
 import { useParams, useRouter } from "next/navigation";
 import React, { useEffect, useState } from "react";
+import { useApiError } from "@/hook/useApiError";
 
 export default function ForgotForm() {
   const { id } = useParams();
   const router = useRouter();
+  const { handleError } = useApiError();
   const [form, setform] = useState({
     username: "",
     lastname: "",
@@ -27,10 +29,10 @@ export default function ForgotForm() {
           roleId: String(res.data.roleId),
         });
       } catch (err) {
-        console.log(err);
+        handleError(err);
       }
     })();
-  }, [id]);
+  }, [id, handleError]);
 
   const onSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -41,7 +43,7 @@ export default function ForgotForm() {
       });
       router.push("/");
     } catch (err) {
-      console.log(err);
+      handleError(err);
     }
   };
 

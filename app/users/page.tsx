@@ -3,6 +3,7 @@
 import axios from "axios";
 import Link from "next/link";
 import React, { useEffect, useState } from "react";
+import { useApiError } from "@/hook/useApiError";
 
 type UserType = {
   id: number;
@@ -18,12 +19,13 @@ type UserType = {
 export default function Page() {
   const [users, setUsers] = useState<UserType[]>([]);
   const [loading, setLoading] = useState(true);
+  const { handleError } = useApiError();
   async function fetchUser() {
     try {
       const res = await axios.get(`/api/user/`);
       setUsers(res.data);
     } catch (err) {
-      console.log(err);
+      handleError(err);
     } finally {
       setLoading(false);
     }
@@ -40,7 +42,7 @@ export default function Page() {
       alert("Delete Success");
       fetchUser();
     } catch (err) {
-      console.error(err);
+      handleError(err);
     }
   };
   return (

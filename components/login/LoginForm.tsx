@@ -4,6 +4,7 @@ import axios from "axios";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import React, { useState } from "react";
+import { useApiError } from "@/hook/useApiError";
 
 export default function LoginForm() {
   const [form, setform] = useState({
@@ -15,6 +16,7 @@ export default function LoginForm() {
   });
   const [saving, setsaving] = useState(false);
   const router = useRouter();
+  const { handleError } = useApiError();
 
   const onChange = (e: React.ChangeEvent<HTMLInputElement>) =>
     setform({ ...form, [e.target.name]: e.target.value });
@@ -27,7 +29,7 @@ export default function LoginForm() {
       await axios.post("/api/user/", { ...form, roleId: Number(form.roleId) });
       router.push("/users");
     } catch (err) {
-      console.log(err);
+      handleError(err);
     } finally {
       setsaving(false);
     }

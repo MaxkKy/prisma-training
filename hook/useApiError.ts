@@ -1,10 +1,11 @@
 import axios from 'axios';
+import { useCallback } from 'react';
 import { toast } from 'sonner';
-import { AppError } from '@/lib/error/AppError';
+import { AppError, type ApiErrorResponse } from '@/lib/error/AppError';
 import { ERROR_MESSAGES } from '@/constants/errorMessages';
 
 export const useApiError = () => {
-  const handleError = (error: unknown) => {
+  const handleError = useCallback((error: unknown) => {
     // 1) Known application error
     if (AppError.isAppError(error)) {
       const message = ERROR_MESSAGES[error.code] ?? error.message;
@@ -17,8 +18,14 @@ export const useApiError = () => {
       return;
     }
 
-    // 2) Axios error (กรณี interceptor ยังไม่แปลง หรือ error จากที่อื่น)
-    if (axios.isAxiosError(error)) {    
+    // 2) Axios error (ใช้ axios ตรงๆ จาก API ของเรา)
+    if (axios.isAxiosError(error)) {
+      const data = error.response?.data as ApiErrorResponse | undefined;
+      if (data?.code) {
+        toast.error(ERROR_MESSAGES[data.code] ?? data.message);
+        return;
+      }
+
       const status = error.response?.status;
 
       if (status === 400) {
@@ -54,7 +61,7 @@ export const useApiError = () => {
     // 3) Unknown error
     console.error('Unhandled error:', error);
     toast.error(ERROR_MESSAGES.DEFAULT);
-  };
+  }, []);
 
   return { handleError };
 };
