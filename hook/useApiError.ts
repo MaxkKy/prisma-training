@@ -1,0 +1,60 @@
+import axios from 'axios';
+import { toast } from 'sonner';
+import { AppError } from '@/lib/error/AppError';
+import { ERROR_MESSAGES } from '@/constants/errorMessages';
+
+export const useApiError = () => {
+  const handleError = (error: unknown) => {
+    // 1) Known application error
+    if (AppError.isAppError(error)) {
+      const message = ERROR_MESSAGES[error.code] ?? error.message;
+      toast.error(message);
+
+      // Handle specific error codes
+      if (error.code === 'UNAUTHORIZED') {
+        // Redirect to login
+      }
+      return;
+    }
+
+    // 2) Axios error (กรณี interceptor ยังไม่แปลง หรือ error จากที่อื่น)
+    if (axios.isAxiosError(error)) {    
+      const status = error.response?.status;
+
+      if (status === 400) {
+        toast.error(ERROR_MESSAGES.BAD_REQUEST);
+        return;
+      }
+      if (status === 401) {
+        toast.error(ERROR_MESSAGES.UNAUTHORIZED);
+        return;
+      }
+
+      if (status === 403) {
+        toast.error(ERROR_MESSAGES.FORBIDDEN);
+        return;
+      }
+
+      if (status === 404) {
+        toast.error(ERROR_MESSAGES.NOT_FOUND);
+        return;
+      }
+
+      if (status === 429) {
+        toast.error(ERROR_MESSAGES.RATE_LIMIT);
+        return;
+      }
+
+      if (!error.response) {
+        toast.error(ERROR_MESSAGES.NETWORK_ERROR);
+        return;
+      }
+    }
+
+    // 3) Unknown error
+    console.error('Unhandled error:', error);
+    toast.error(ERROR_MESSAGES.DEFAULT);
+  };
+
+  return { handleError };
+};
